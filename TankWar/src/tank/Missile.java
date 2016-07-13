@@ -1,18 +1,20 @@
 package tank;
 
 import java.awt.*;
-
+import java.util.List;
 /**
  * Created by zhendong on 2016/7/12.
  * email:myyizhendong@gmail.com
  */
 public class Missile{
+
+	private TankClient tc;
 	private int x,y;
 	private Tank.Direction dir;
 	public static final int WIDTH = 10,HEIGHT = 10;
 	public static final int XSPEED = 10,YSPEED = 10;
 	private boolean live = true;
-
+	private boolean good;
 
 	public boolean isLive(){
 		return live;
@@ -31,13 +33,21 @@ public class Missile{
 		this.y=y;
 		this.dir=dir;
 	}
+	public Missile(int x,int y, Tank.Direction dir,TankClient tc,boolean good){
+		this(x,y,dir);
+		this.tc = tc;
+		this.good = good;
+	}
 
 	/**
 	 * 画一个子弹
 	 * @param g
 	 */
 	public void draw(Graphics g){
-		if(!live) return;
+		if(!live) {
+			tc.missiles.remove(this);
+			return;
+		}
 		Color c = g.getColor();
 		g.setColor(Color.BLACK);
 		g.fillOval(x,y,WIDTH,HEIGHT);
@@ -83,7 +93,9 @@ public class Missile{
 		//如果子弹出界，则令 子弹死亡
 		if( x < 0 || y < 0 || x > TankClient.GAMEWIDTH || y > TankClient.GAMEHEIGHT){
 			live = false;
+			tc.missiles.remove(this);
 		}
+
 	}
 
 	/**
@@ -100,12 +112,22 @@ public class Missile{
 	 * @return  true: 坦克被子弹打中；false：坦克没有被子弹打中
 	 */
 	public boolean hitTank(Tank t){
-		if(this.getRect().intersects(t.getRect()) && t.isLive()){
+		if(this.live && this.getRect().intersects(t.getRect()) && t.isLive()&& this.good!=t.isGood()){
 			this.live = false;
 			t.setLive(false);
+			Explode e = new Explode(x,y,tc);
+			tc.explodes.add(e);
 			return true;
 		}
 		return false;
 	}
 
+	public boolean hitTanks(List<Tank> tanks){
+		for(int i = 0; i < tanks.size(); i++){
+			if(hitTank(tanks.get(i))){
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -2,6 +2,7 @@ package tank;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 /**
  * Created by zhendong on 2016/7/12.
@@ -21,12 +22,20 @@ public class Tank{
 
 	private boolean bL = false,bU = false,bR = false,bD = false;
 
+
+
+
 	private boolean good;
 	private boolean live = true;
 	enum Direction {L, LU, U, RU, R, RD, D, LD, STOP}
 
 
 	private TankClient tc = null;
+
+	//生成一个静态的随机数产生器
+	private static Random r = new Random();
+
+	private int step = r.nextInt(9) + 3;
 
 
 	public boolean isLive(){
@@ -49,17 +58,27 @@ public class Tank{
 		this.good=good;
 	}
 
-	//新的构造方法
 	public Tank(int x,int y,boolean good,TankClient tc){
 		this(x,y,good);
 		this.tc = tc;
+	}
+	//新的构造方法
+	public Tank(int x,int y,boolean good,TankClient tc,Tank.Direction dir){
+		this(x,y,good);
+		this.tc = tc;
+		this.dir = dir;
 	}
 	/**
 	 * 画出坦克
 	 * @param g graphics
 	 */
 	public void draw(Graphics g){
-		if(!live) return;
+		if(!live) {
+			if(!good){
+				tc.tanks.remove(this);
+			}
+			return;
+		}
 		Color c = g.getColor();
 		if(good) g.setColor(Color.RED);
 		else g.setColor(Color.BLUE);
@@ -142,6 +161,23 @@ public class Tank{
 		if(y < 30) y = 30;
 		if(x + Tank.WIDTH > TankClient.GAMEWIDTH) x = TankClient.GAMEWIDTH - Tank.WIDTH;
 		if(y + Tank.HEIGHT > TankClient.GAMEHEIGHT) y = TankClient.GAMEHEIGHT - Tank.HEIGHT;
+
+		//改变一次方向，以及走的步数
+		if(!good){
+			Direction[] dirs = Direction.values();
+
+			if(step == 0){
+				step = r.nextInt(9) + 3;
+				int rn = r.nextInt(dirs.length);
+				dir = dirs[rn];
+			}
+
+			step--;
+			if(r.nextInt(40)>35){
+				this.fire();
+			}
+		}
+
 	}
 
 	/**
@@ -168,9 +204,10 @@ public class Tank{
 	}
 
 	private Missile fire(){
+		if(!live) return null;
 		int x = this.x + Tank.WIDTH/2 - Missile.WIDTH/2;
 		int y = this.y + Tank.HEIGHT/2 - Missile.HEIGHT/2;
-		Missile m = new Missile(x,y,ptDir);
+		Missile m = new Missile(x,y,ptDir,this.tc,this.good);
 		tc.missiles.add(m);
 		return m;
 	}
@@ -219,4 +256,7 @@ public class Tank{
 		return new Rectangle(x, y, WIDTH, HEIGHT);
 	}
 
+	public boolean isGood(){
+		return good;
+	}
 }

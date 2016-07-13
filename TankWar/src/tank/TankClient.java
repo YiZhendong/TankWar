@@ -19,14 +19,21 @@ public class TankClient extends Frame{
 
 	//定义一辆坦克,注意this
 	Tank myTank = new Tank(50,50,true,this);
-	//定义一辆敌人坦克
-	Tank enemyTank = new Tank(100,100,false,this);
 
 	//定义子弹
 	//需要明确的引入util.List这个包
 	List<Missile> missiles = new ArrayList<Missile>();
 
+	List<Tank> tanks = new ArrayList<Tank>();
+	//定义爆炸
+	List<Explode> explodes = new ArrayList<Explode>();
+
 	public void launchFrame(){
+
+		for(int i=0 ;i<10 ;i++){
+			tanks.add(new Tank(50+60*(i+1),50,false,this,Tank.Direction.D));
+		}
+
 		this.setLocation(400,300);
 		this.setSize(GAMEWIDTH,GAMEHEIGHT);
 		this.setTitle("TankWar");
@@ -56,19 +63,36 @@ public class TankClient extends Frame{
 	@Override
 	public void paint(Graphics g){
 
+		g.drawString("missiles count:" + missiles.size(), 10, 50);
+		g.drawString("exolodes count:" + explodes.size(), 10, 80);
+		g.drawString("tanks count:" + tanks.size(), 10, 110);
+
 		for(int i=0; i<missiles.size();i++){
 			Missile m = missiles.get(i);
-			//判断是否击中敌人坦克,如果打中坦克，将坦克的生命值设置为false
+			/*//判断是否击中敌人坦克,如果打中坦克，将坦克的生命值设置为false
 			if(m.hitTank(enemyTank)){
 				enemyTank.setLive(false);
-
-			}
-			//判断子弹是否活着
+			}*/
+			m.hitTanks(tanks);
+			m.hitTank(myTank);
+			m.draw(g);
+			/*//判断子弹是否活着
 			if(!m.isLive()) missiles.remove(m);
-			else m.draw(g);
+			else m.draw(g);*/
+		}
+
+
+		for (int i=0;i<explodes.size();i++){
+			Explode e = explodes.get(i);
+			e.draw(g);
+		}
+
+		for(int i = 0;i<tanks.size();i++){
+			Tank t = tanks.get(i);
+			t.draw(g);
 		}
 		myTank.draw(g);
-		enemyTank.draw(g);
+
 
 	}
 
@@ -102,7 +126,7 @@ public class TankClient extends Frame{
 				//repaint是调用的外部包装类的方法
 				repaint();
 				try{
-					Thread.sleep(100);
+					Thread.sleep(50);
 				}catch (InterruptedException e){
 					e.printStackTrace();
 				}
