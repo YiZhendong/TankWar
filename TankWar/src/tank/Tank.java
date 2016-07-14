@@ -1,8 +1,11 @@
 package tank;
 
+import com.sun.org.apache.bcel.internal.generic.RETURN;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.Random;
+import java.util.List;
 
 /**
  * Created by zhendong on 2016/7/12.
@@ -22,13 +25,16 @@ public class Tank{
 
 	private boolean bL = false,bU = false,bR = false,bD = false;
 
-
-
+	private int oldX;
+	private int oldY;
 
 	private boolean good;
 	private boolean live = true;
 	enum Direction {L, LU, U, RU, R, RD, D, LD, STOP}
 
+	private BloodBar bb = new BloodBar();
+
+	private int life = 80;
 
 	private TankClient tc = null;
 
@@ -38,6 +44,14 @@ public class Tank{
 	private int step = r.nextInt(9) + 3;
 
 
+	public int getLife(){
+		return life;
+	}
+
+	public void setLife(int life){
+		this.life=life;
+	}
+
 	public boolean isLive(){
 		return live;
 	}
@@ -46,6 +60,10 @@ public class Tank{
 		this.live=live;
 	}
 
+
+	public boolean isGood(){
+		return good;
+	}
 
 	/**
 	 * 构造坦克
@@ -68,6 +86,14 @@ public class Tank{
 		this.tc = tc;
 		this.dir = dir;
 	}
+
+	public Tank(int x,int y,boolean good,TankClient tc,Tank.Direction dir,int life){
+		this(x,y,good,tc,dir);
+		this.life = life;
+	}
+
+
+
 	/**
 	 * 画出坦克
 	 * @param g graphics
@@ -79,13 +105,14 @@ public class Tank{
 			}
 			return;
 		}
+
 		Color c = g.getColor();
 		if(good) g.setColor(Color.RED);
 		else g.setColor(Color.BLUE);
 
 		g.fillOval(x,y,WIDTH,HEIGHT);
 		g.setColor(c);
-
+		if(good) bb.draw(g);
 		switch (ptDir) {
 			case L:
 				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x, y + Tank.HEIGHT / 2);
@@ -120,6 +147,8 @@ public class Tank{
 	 * 根据dir来移动
 	 */
 	public void move(){
+		oldX = x;
+		oldY = y;
 		switch (dir){
 			case L:
 				x -= XSPEED;
@@ -152,6 +181,13 @@ public class Tank{
 			case STOP:
 				break;
 		}
+		if(collidesWithWalls(tc.walls)){
+			stay();
+		}
+
+		if(collidesWithTanks(tc.tanks)){
+			stay();
+		}
 
 		if(this.dir != Direction.STOP){
 			this.ptDir = this.dir;
@@ -173,13 +209,60 @@ public class Tank{
 			}
 
 			step--;
-			if(r.nextInt(40)>35){
+			if(r.nextInt(40)>38){
 				this.fire();
 			}
 		}
 
+
 	}
 
+	private void stay(){
+		this.x = oldX;
+		this.y = oldY;
+	}
+
+	/**
+	 *
+	 * @param walls
+	 * @return boolean 如果碰撞了，返回true，否则返回false；
+	 */
+	public boolean collidesWithWalls(List<Wall> walls){
+		for(int i = 0;i < walls.size();i++){
+			if(collidesWithWall(walls.get(i))){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean collidesWithWall(Wall wall){
+		if(this.live && this.getRect().intersects(wall.getRect()) && wall.isLive()){
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 判断坦克之间是否碰撞
+	 * @param tanks
+	 * @return
+	 */
+	public boolean collidesWithTanks(List<Tank> tanks){
+		for(int i = 0;i < tanks.size();i++){
+			if(collidesWithTank(tanks.get(i)) && !this.equals(tanks.get(i))){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean collidesWithTank(Tank tank){
+		if(this.live && this.getRect().intersects(tank.getRect()) && tank.isLive()){
+			return true;
+		}
+		return false;
+	}
 	/**
 	 * 响应键盘事件,设置方向的布尔值
 	 * @param e KeyEvent e
@@ -212,9 +295,28 @@ public class Tank{
 		return m;
 	}
 
+	private Missile fire(Direction dir){
+		if(!live) return null;
+		int x = this.x + Tank.WIDTH/2 - Missile.WIDTH/2;
+		int y = this.y + Tank.HEIGHT/2 - Missile.HEIGHT/2;
+		Missile m = new Missile(x,y,dir,this.tc,this.good);
+		tc.missiles.add(m);
+		return m;
+	}
+
+	private void specialFire(){
+		Direction[] dirs = Direction.values();
+		for (int i= 0;i< 8;i++) {
+			fire(dirs[i]);
+		}
+	}
+
 	public void keyRealeased(KeyEvent e){
 		int key = e.getKeyCode();
 		switch(key){
+			case KeyEvent.VK_A:
+				specialFire();
+				break;
 			case KeyEvent.VK_CONTROL:
 				fire();
 				break;
@@ -233,6 +335,9 @@ public class Tank{
 		}
 		relocate();
 	}
+
+
+
 	/**
 	 * 重新改变方向
 	 */
@@ -256,7 +361,25 @@ public class Tank{
 		return new Rectangle(x, y, WIDTH, HEIGHT);
 	}
 
-	public boolean isGood(){
-		return good;
+	private class BloodBar{
+		public void draw(Graphics g){
+			Color c = g.getColor();
+			g.setColor(Color.RED);
+			g.drawRect(x,y-10,WIDTH,10);
+			int w = WIDTH * life/80;
+			g.fillRect(x,y-10,w,10);
+			g.setColor(c);
+		}
+
 	}
+
+	public boolean eat(Blood b){
+		if(this.live && b.isLive() && this.getRect().intersects(b.getRect())){
+			this.life = 100;
+			b.setLive(false);
+			return true;
+		}
+		return false;
+	}
+
 }

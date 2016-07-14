@@ -18,7 +18,7 @@ public class TankClient extends Frame{
 	public static final int GAMEHEIGHT = 600;
 
 	//定义一辆坦克,注意this
-	Tank myTank = new Tank(50,50,true,this);
+	Tank myTank = new Tank(50,500,true,this,Tank.Direction.D,80);
 
 	//定义子弹
 	//需要明确的引入util.List这个包
@@ -27,13 +27,18 @@ public class TankClient extends Frame{
 	List<Tank> tanks = new ArrayList<Tank>();
 	//定义爆炸
 	List<Explode> explodes = new ArrayList<Explode>();
+	List<Wall> walls = new ArrayList<Wall>();
 
+	Blood b = new Blood();
 	public void launchFrame(){
 
 		for(int i=0 ;i<10 ;i++){
-			tanks.add(new Tank(50+60*(i+1),50,false,this,Tank.Direction.D));
+			tanks.add(new Tank(50+60*(i+1),50,false,this,Tank.Direction.D,10));
 		}
 
+		for(int i=0; i<10 ; i++){
+			walls.add(new Wall(70,35*(i+1),this));
+		}
 		this.setLocation(400,300);
 		this.setSize(GAMEWIDTH,GAMEHEIGHT);
 		this.setTitle("TankWar");
@@ -66,20 +71,17 @@ public class TankClient extends Frame{
 		g.drawString("missiles count:" + missiles.size(), 10, 50);
 		g.drawString("exolodes count:" + explodes.size(), 10, 80);
 		g.drawString("tanks count:" + tanks.size(), 10, 110);
+		g.drawString("walls count:" + walls.size(), 10, 140);
+		g.drawString("mytank life:" + myTank.getLife(), 10, 170);
 
 		for(int i=0; i<missiles.size();i++){
 			Missile m = missiles.get(i);
-			/*//判断是否击中敌人坦克,如果打中坦克，将坦克的生命值设置为false
-			if(m.hitTank(enemyTank)){
-				enemyTank.setLive(false);
-			}*/
 			m.hitTanks(tanks);
 			m.hitTank(myTank);
+			m.hitWalls(walls);
 			m.draw(g);
-			/*//判断子弹是否活着
-			if(!m.isLive()) missiles.remove(m);
-			else m.draw(g);*/
 		}
+
 
 
 		for (int i=0;i<explodes.size();i++){
@@ -89,10 +91,18 @@ public class TankClient extends Frame{
 
 		for(int i = 0;i<tanks.size();i++){
 			Tank t = tanks.get(i);
+			t.collidesWithWalls(walls);
+			t.collidesWithTanks(tanks);
 			t.draw(g);
 		}
+		b.draw(g);
 		myTank.draw(g);
+		myTank.eat(b);
 
+		for(int i = 0; i < walls.size(); i++){
+			Wall w = walls.get(i);
+			w.draw(g);
+		}
 
 	}
 

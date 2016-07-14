@@ -114,7 +114,10 @@ public class Missile{
 	public boolean hitTank(Tank t){
 		if(this.live && this.getRect().intersects(t.getRect()) && t.isLive()&& this.good!=t.isGood()){
 			this.live = false;
-			t.setLive(false);
+			t.setLife(t.getLife() -10);
+			if(t.getLife()==0){
+				t.setLive(false);
+			}
 			Explode e = new Explode(x,y,tc);
 			tc.explodes.add(e);
 			return true;
@@ -122,11 +125,34 @@ public class Missile{
 		return false;
 	}
 
+	/**
+	 * 判断子弹是否打中坦克序列
+	 * @param tanks 坦克序列
+	 * @return  boolean 类型
+	 */
 	public boolean hitTanks(List<Tank> tanks){
 		for(int i = 0; i < tanks.size(); i++){
 			if(hitTank(tanks.get(i))){
 				return true;
 			}
+		}
+		return false;
+	}
+
+	public boolean hitWalls(List<Wall> walls){
+		for(int i = 0;i < walls.size();i++){
+			if(hitWall(walls.get(i))){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean hitWall(Wall wall){
+		if(this.live && this.getRect().intersects(wall.getRect()) && wall.isLive()){
+			this.live = false;
+			wall.setLive(false);
+			return true;
 		}
 		return false;
 	}
