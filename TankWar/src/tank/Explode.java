@@ -3,10 +3,18 @@ package tank;
 import java.awt.*;
 
 /**
+ * 爆炸类
  * Created by zhendong on 2016/7/13.
  * email:myyizhendong@gmail.com
  */
 public class Explode{
+	/**
+	 * live：爆炸是否还活着
+	 * x，y爆炸的坐标
+	 * TankClient ：tc工具类
+	 * diameter[]：爆炸的维度
+	 * step：步数
+	 */
 	private boolean live = true;
 	private int x,y;
 	private TankClient tc;
@@ -19,6 +27,10 @@ public class Explode{
 		this.tc=tc;
 	}
 
+	/**
+	 * 显示爆炸
+	 * @param g
+	 */
 	public void draw(Graphics g){
 		if(!live) {
 			tc.explodes.remove(this);
