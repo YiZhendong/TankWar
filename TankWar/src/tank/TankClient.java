@@ -8,10 +8,11 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
+/**这个类的作用是坦克游戏的主窗口
  * Created by zhendong on 2016/7/11.
  * email:myyizhendong@gmail.com
  */
+
 public class TankClient extends Frame{
 
 	public static final int GAMEWIDTH = 800;
@@ -20,16 +21,21 @@ public class TankClient extends Frame{
 	//定义一辆坦克,注意this
 	Tank myTank = new Tank(50,500,true,this,Tank.Direction.D,80);
 
-	//定义子弹
-	//需要明确的引入util.List这个包
+	/**
+	 * 设置一个虚拟图片
+	 * 定义子弹，坦克，爆炸，墙的数量，以及一个血块
+	 * 需要明确的引入util.List这个包
+	 */
 	List<Missile> missiles = new ArrayList<Missile>();
-
 	List<Tank> tanks = new ArrayList<Tank>();
-	//定义爆炸
 	List<Explode> explodes = new ArrayList<Explode>();
 	List<Wall> walls = new ArrayList<Wall>();
-
 	Blood b = new Blood();
+	Image offScreenImage = null;
+	/**
+	 * 本方法显示坦克主窗口
+	 * 分别循环产生10个敌方坦克，10堵墙，定义游戏的界面
+	 */
 	public void launchFrame(){
 
 		for(int i=0 ;i<10 ;i++){
@@ -59,12 +65,19 @@ public class TankClient extends Frame{
 		//启动线程
 		new Thread(new PaintThread()).start();
 	}
+
+	/**
+	 * 坦克游戏主方法
+	 * @param args
+	 */
 	public static void main (String args[]){
 		TankClient tc = new TankClient();
 		tc.launchFrame();
 	}
 
-	//paint 方法不用调用，自己就会执行
+	/**
+	 * paint 方法不用调用，自己就会执行
+	 */
 	@Override
 	public void paint(Graphics g){
 
@@ -73,6 +86,12 @@ public class TankClient extends Frame{
 		g.drawString("tanks count:" + tanks.size(), 10, 110);
 		g.drawString("walls count:" + walls.size(), 10, 140);
 		g.drawString("mytank life:" + myTank.getLife(), 10, 170);
+
+		if(tanks.size()<=0){
+			for(int i=0 ;i<5 ;i++){
+				tanks.add(new Tank(50+60*(i+1),50,false,this,Tank.Direction.D,10));
+			}
+		}
 
 		for(int i=0; i<missiles.size();i++){
 			Missile m = missiles.get(i);
@@ -106,8 +125,7 @@ public class TankClient extends Frame{
 
 	}
 
-	//设置一个虚拟图片
-	Image offScreenImage = null;
+
 
 	/**
 	 * 利用双缓冲消除闪烁
@@ -129,7 +147,10 @@ public class TankClient extends Frame{
 		g.drawImage(offScreenImage,0,0,null);
 	}
 
-	//新建一个内部类，线程控制坦克移动
+	/**
+	 * 新建一个内部类，线程类，控制坦克移动
+	 *
+	 */
 	public class PaintThread implements Runnable{
 		public void run(){
 			while(true){
@@ -144,7 +165,11 @@ public class TankClient extends Frame{
 		}
 	}
 
-	//键盘监听类,继承KeyAdapter
+	/**
+	 * 键盘监听类,继承KeyAdapter
+	 * 监听键盘按下和弹起的事件
+	 *
+	 */
 	private class KeyMonitor extends KeyAdapter{
 
 		@Override

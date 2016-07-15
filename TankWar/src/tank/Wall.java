@@ -3,10 +3,18 @@ package tank;
 import java.awt.*;
 
 /**
+ * 墙的类
  * Created by zhendong on 2016/7/13.
  * email:myyizhendong@gmail.com
  */
 public class Wall{
+	/**
+	 * WIDTH,HEIGHT：一堵墙的宽度，高度
+	 * X,Y ：    墙的坐标
+	 * live：墙是否还活着
+	 * TankClient ：tc 工具类
+	 *
+	 */
 	private static int WIDTH = 10;
 	private static int HEIGHT = 30;
 	private  int x=10;

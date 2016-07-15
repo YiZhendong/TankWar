@@ -8,10 +8,27 @@ import java.util.Random;
 import java.util.List;
 
 /**
+ * 坦克类，用来存放和生成关于坦克的相关方法与变量
  * Created by zhendong on 2016/7/12.
  * email:myyizhendong@gmail.com
  */
 public class Tank{
+	/**
+	 * int x,y坦克的x坐标，y坐标
+	 * int XSPEED,YSPEED:坦克x方向和y方向的速度
+	 * int WIDTH，HEIGHT：坦克所在长方形的宽度和高度
+	 * Direction ptDir:炮筒的方向
+	 * Direciont dir:坦克的方向
+	 * boolean bL,bU,bR,bD:方向是否为真
+	 * int oldX,oldY:移动之前的坐标，用来处理碰撞之后返回原位置
+	 * boolean good:是否是我方坦克
+	 * boolean live:是否还活着
+	 * enum Direction:8个方向
+	 * BloodBar bb:血槽内部类
+	 * int life:血量，默认是80
+	 * TankClient tc: TankClient 类
+	 * Random r:产生随机数
+	 */
 	private int x,y;
 	private static final int XSPEED = 5;
 	private static final int YSPEED = 5;
@@ -43,6 +60,10 @@ public class Tank{
 
 	private int step = r.nextInt(9) + 3;
 
+	/**
+	 * getter与setter方法
+	 * @return
+	 */
 
 	public int getLife(){
 		return life;
@@ -66,9 +87,9 @@ public class Tank{
 	}
 
 	/**
-	 * 构造坦克
-	 * @param x
-	 * @param y
+	 * 坦克的构造方法
+	 * @param x，int 坦克所在矩形的x坐标
+	 * @param y，int 坦克所在矩形的y坐标
 	 */
 	public Tank(int x, int y,boolean good){
 		this.x=x;
@@ -76,16 +97,42 @@ public class Tank{
 		this.good=good;
 	}
 
+	/**
+	 * 坦克的构造方法
+	 * @param x ，同上
+	 * @param y ，同上
+	 * @param good ，boolean 坦克是否为我方坦克
+	 * @param tc ,TankClient
+	 */
 	public Tank(int x,int y,boolean good,TankClient tc){
 		this(x,y,good);
 		this.tc = tc;
 	}
-	//新的构造方法
+
+	/**
+	 * 坦克的构造方法
+	 * @param x ，同上
+	 * @param y ，同上
+	 * @param good ，同上
+	 * @param tc ，同上
+	 * @param dir ，Direction 坦克方向
+	 */
 	public Tank(int x,int y,boolean good,TankClient tc,Tank.Direction dir){
 		this(x,y,good);
 		this.tc = tc;
 		this.dir = dir;
 	}
+
+
+	/**
+	 * 坦克的构造方法
+	 * @param x ，同上
+	 * @param y ，同上
+	 * @param good ，同上
+	 * @param tc ，同上
+	 * @param dir ，Direction 坦克方向
+	 * @param life , int 生命值
+	 */
 
 	public Tank(int x,int y,boolean good,TankClient tc,Tank.Direction dir,int life){
 		this(x,y,good,tc,dir);
@@ -96,6 +143,8 @@ public class Tank{
 
 	/**
 	 * 画出坦克
+	 * 如果坦克不再存活，从tanks中移除
+	 * 否则，画出该坦克
 	 * @param g graphics
 	 */
 	public void draw(Graphics g){
@@ -145,6 +194,7 @@ public class Tank{
 
 	/**
 	 * 根据dir来移动
+	 * 事先存放oldX,oldY,当发生碰撞时返回旧坐标
 	 */
 	public void move(){
 		oldX = x;
@@ -181,10 +231,17 @@ public class Tank{
 			case STOP:
 				break;
 		}
+
+		/*
+		如果和墙碰撞，呆在原地
+		 */
 		if(collidesWithWalls(tc.walls)){
 			stay();
 		}
 
+		/*
+		如果和坦克碰撞，呆在原地
+		 */
 		if(collidesWithTanks(tc.tanks)){
 			stay();
 		}
@@ -217,14 +274,17 @@ public class Tank{
 
 	}
 
+	/**
+	 * 呆在原地
+	 */
 	private void stay(){
 		this.x = oldX;
 		this.y = oldY;
 	}
 
 	/**
-	 *
-	 * @param walls
+	 * 撞墙序列
+	 * @param walls 被撞的墙的序列
 	 * @return boolean 如果碰撞了，返回true，否则返回false；
 	 */
 	public boolean collidesWithWalls(List<Wall> walls){
@@ -236,6 +296,11 @@ public class Tank{
 		return false;
 	}
 
+	/**
+	 * 撞墙
+	 * @param wall 被撞的墙
+	 * @return boolean 如果碰撞了，返回true，否则返回false；
+	 */
 	private boolean collidesWithWall(Wall wall){
 		if(this.live && this.getRect().intersects(wall.getRect()) && wall.isLive()){
 			return true;
@@ -244,9 +309,9 @@ public class Tank{
 	}
 
 	/**
-	 * 判断坦克之间是否碰撞
-	 * @param tanks
-	 * @return
+	 * 判断坦克序列之间是否碰撞
+	 * @param tanks 被撞的坦克序列
+	 * @return boolean 如果碰撞了，返回true，否则返回false；
 	 */
 	public boolean collidesWithTanks(List<Tank> tanks){
 		for(int i = 0;i < tanks.size();i++){
@@ -257,6 +322,11 @@ public class Tank{
 		return false;
 	}
 
+	/**
+	 * 判断坦克之间是否碰撞
+	 * @param tank 被撞的坦克
+	 * @return boolean 如果碰撞了，返回true，否则返回false；
+	 */
 	private boolean collidesWithTank(Tank tank){
 		if(this.live && this.getRect().intersects(tank.getRect()) && tank.isLive()){
 			return true;
@@ -265,11 +335,23 @@ public class Tank{
 	}
 	/**
 	 * 响应键盘事件,设置方向的布尔值
-	 * @param e KeyEvent e
+	 * @param e KeyEvent e，键盘事件
+	 *          left:控制坦克向左
+	 *          right:控制坦克向右
+	 *          up:控制坦克向上
+	 *          down:控制坦克向下
+	 *          F2:自己坦克死后可以按f2键复活
+	 *
 	 */
 	public void keyPressed(KeyEvent e){
 		int key = e.getKeyCode();
 		switch(key){
+			case KeyEvent.VK_F2:
+				if(this.live == false){
+					this.setLife(100);
+					this.setLive(true);
+				}
+
 			case KeyEvent.VK_LEFT:
 				bL = true;
 				break;
@@ -286,6 +368,10 @@ public class Tank{
 		relocate();
 	}
 
+	/**
+	 * fire方法，如果坦克还存活，可以生成子弹
+	 * @return missile 返回一个子弹
+	 */
 	private Missile fire(){
 		if(!live) return null;
 		int x = this.x + Tank.WIDTH/2 - Missile.WIDTH/2;
@@ -295,6 +381,11 @@ public class Tank{
 		return m;
 	}
 
+	/**
+	 * fire方法，如果坦克还存活，可以生成dir方向的子弹
+	 * @param dir 子弹的方向
+	 * @return missile 返回一个dir方向的子弹
+	 */
 	private Missile fire(Direction dir){
 		if(!live) return null;
 		int x = this.x + Tank.WIDTH/2 - Missile.WIDTH/2;
@@ -304,6 +395,9 @@ public class Tank{
 		return m;
 	}
 
+	/**
+	 * 特殊fire方法，可以朝8个方向同时发射子弹
+	 */
 	private void specialFire(){
 		Direction[] dirs = Direction.values();
 		for (int i= 0;i< 8;i++) {
@@ -311,6 +405,16 @@ public class Tank{
 		}
 	}
 
+	/**
+	 *
+	 * KeyEvent e，键盘事件
+	 *          left:控制坦克向左
+	 *          right:控制坦克向右
+	 *          up:控制坦克向上
+	 *          down:控制坦克向下
+	 *          F2:自己坦克死后可以按f2键复活
+	 * @param e 键盘释放事件
+	 */
 	public void keyRealeased(KeyEvent e){
 		int key = e.getKeyCode();
 		switch(key){
@@ -354,8 +458,8 @@ public class Tank{
 	}
 
 	/**
-	 *
-	 * @return 返回坦克所在的矩形
+	 * 返回坦克所在的矩形
+	 * @return Rectangle，返回的矩形
 	 */
 	public Rectangle getRect(){
 		return new Rectangle(x, y, WIDTH, HEIGHT);
@@ -373,6 +477,12 @@ public class Tank{
 
 	}
 
+	/**
+	 * 判断坦克是否可以吃掉血块
+	 * @param b ，Blood 血块
+	 * @return boolean, 如果和血块碰撞，则吃了血块，返回true
+	 *          否则，返回false
+	 */
 	public boolean eat(Blood b){
 		if(this.live && b.isLive() && this.getRect().intersects(b.getRect())){
 			this.life = 100;

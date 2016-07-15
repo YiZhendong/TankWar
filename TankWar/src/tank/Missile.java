@@ -3,11 +3,21 @@ package tank;
 import java.awt.*;
 import java.util.List;
 /**
+ * 子弹类
  * Created by zhendong on 2016/7/12.
  * email:myyizhendong@gmail.com
  */
 public class Missile{
 
+	/**
+	 * TankClient 实例 tc
+	 * x，y代表子弹的x和y坐标
+	 * Tank.Direction dir代表坦克的方向
+	 * WIDTH,HEIGHT子弹的宽度，高度
+	 * XSPEED,YSPEED代表子弹的X,Y方向上的速度
+	 * live ：子弹是否还活着
+	 * good：子弹是否是好弹
+	 */
 	private TankClient tc;
 	private int x,y;
 	private Tank.Direction dir;
@@ -148,6 +158,11 @@ public class Missile{
 		return false;
 	}
 
+	/**
+	 * 判断子弹是否打中墙
+	 * @param wall 判断的墙
+	 * @return 如果打中，返回true，否则返回false
+	 */
 	private boolean hitWall(Wall wall){
 		if(this.live && this.getRect().intersects(wall.getRect()) && wall.isLive()){
 			this.live = false;
