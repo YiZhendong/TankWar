@@ -5,8 +5,10 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**这个类的作用是坦克游戏的主窗口
  * Created by zhendong on 2016/7/11.
@@ -19,7 +21,7 @@ public class TankClient extends Frame{
 	public static final int GAMEHEIGHT = 600;
 
 	//定义一辆坦克,注意this
-	Tank myTank = new Tank(50,500,true,this,Tank.Direction.D,80);
+	Tank myTank = new Tank(50,500,true,this,Direction.STOP,80);
 
 	/**
 	 * 设置一个虚拟图片
@@ -32,14 +34,16 @@ public class TankClient extends Frame{
 	List<Wall> walls = new ArrayList<Wall>();
 	Blood b = new Blood();
 	Image offScreenImage = null;
+
 	/**
 	 * 本方法显示坦克主窗口
 	 * 分别循环产生10个敌方坦克，10堵墙，定义游戏的界面
 	 */
 	public void launchFrame(){
 
-		for(int i=0 ;i<10 ;i++){
-			tanks.add(new Tank(50+60*(i+1),50,false,this,Tank.Direction.D,10));
+		int initTankCount = Integer.parseInt(PropertyMgr.getProperty("initTankCount"));
+		for(int i=0 ;i<initTankCount ;i++){
+			tanks.add(new Tank(50+60*(i+1),50,false,this,Direction.D,10));
 		}
 
 		for(int i=0; i<10 ; i++){
@@ -88,8 +92,8 @@ public class TankClient extends Frame{
 		g.drawString("mytank life:" + myTank.getLife(), 10, 170);
 
 		if(tanks.size()<=0){
-			for(int i=0 ;i<5 ;i++){
-				tanks.add(new Tank(50+60*(i+1),50,false,this,Tank.Direction.D,10));
+			for(int i=0 ;i<Integer.parseInt(PropertyMgr.getProperty("reProduceTankCount"));i++){
+				tanks.add(new Tank(50+60*(i+1),50,false,this,Direction.D,10));
 			}
 		}
 
@@ -140,7 +144,7 @@ public class TankClient extends Frame{
 		}
 		Graphics gOffScreen = offScreenImage.getGraphics();
 		Color c = gOffScreen.getColor();
-		gOffScreen.setColor(Color.GREEN);
+		gOffScreen.setColor(Color.BLACK);
 		gOffScreen.fillRect(0,0,GAMEWIDTH,GAMEHEIGHT);
 		gOffScreen.setColor(c);
 		paint(gOffScreen);

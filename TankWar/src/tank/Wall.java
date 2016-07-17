@@ -41,7 +41,7 @@ public class Wall{
 			return;
 		}
 		Color c = g.getColor();
-		g.setColor(Color.BLACK);
+		g.setColor(Color.DARK_GRAY);
 		g.fillRect(x,y,WIDTH,HEIGHT);
 		g.setColor(c);
 	}

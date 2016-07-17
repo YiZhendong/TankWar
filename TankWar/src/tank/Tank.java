@@ -4,6 +4,8 @@ import com.sun.org.apache.bcel.internal.generic.RETURN;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.List;
 
@@ -47,7 +49,7 @@ public class Tank{
 
 	private boolean good;
 	private boolean live = true;
-	enum Direction {L, LU, U, RU, R, RD, D, LD, STOP}
+
 
 	private BloodBar bb = new BloodBar();
 
@@ -59,6 +61,31 @@ public class Tank{
 	private static Random r = new Random();
 
 	private int step = r.nextInt(9) + 3;
+
+	private static Toolkit tk = Toolkit.getDefaultToolkit();
+	private static Image[] TankImages = null;
+	private static Map<String , Image> imgs = new HashMap<>();
+	static {
+		TankImages = new Image[]
+		{
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankL.gif")),
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankLU.gif")),
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankU.gif")),
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankRU.gif")),
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankR.gif")),
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankRD.gif")),
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankD.gif")),
+			tk.getImage(Tank.class.getClassLoader().getResource("images/tankLD.gif"))
+		};
+		imgs.put("L",TankImages[0]);
+		imgs.put("LU",TankImages[1]);
+		imgs.put("U",TankImages[2]);
+		imgs.put("RU",TankImages[3]);
+		imgs.put("R",TankImages[4]);
+		imgs.put("RD",TankImages[5]);
+		imgs.put("D",TankImages[6]);
+		imgs.put("LD",TankImages[7]);
+	}
 
 	/**
 	 * getter与setter方法
@@ -117,7 +144,7 @@ public class Tank{
 	 * @param tc ，同上
 	 * @param dir ，Direction 坦克方向
 	 */
-	public Tank(int x,int y,boolean good,TankClient tc,Tank.Direction dir){
+	public Tank(int x,int y,boolean good,TankClient tc,Direction dir){
 		this(x,y,good);
 		this.tc = tc;
 		this.dir = dir;
@@ -134,7 +161,7 @@ public class Tank{
 	 * @param life , int 生命值
 	 */
 
-	public Tank(int x,int y,boolean good,TankClient tc,Tank.Direction dir,int life){
+	public Tank(int x,int y,boolean good,TankClient tc,Direction dir,int life){
 		this(x,y,good,tc,dir);
 		this.life = life;
 	}
@@ -155,37 +182,31 @@ public class Tank{
 			return;
 		}
 
-		Color c = g.getColor();
-		if(good) g.setColor(Color.RED);
-		else g.setColor(Color.BLUE);
 
-		g.fillOval(x,y,WIDTH,HEIGHT);
-		g.setColor(c);
 		if(good) bb.draw(g);
 		switch (ptDir) {
 			case L:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x, y + Tank.HEIGHT / 2);
+				g.drawImage(imgs.get("L"),x,y,null);
 				break;
 			case LU:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x, y);
+				g.drawImage(imgs.get("LU"),x,y,null);
 				break;
 			case U:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x + Tank.WIDTH / 2, y);
+				g.drawImage(imgs.get("U"),x,y,null);
 				break;
 			case RU:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x + Tank.WIDTH, y);
+				g.drawImage(imgs.get("RU"),x,y,null);
 				break;
 			case R:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x + Tank.WIDTH , y + Tank.HEIGHT / 2);
+				g.drawImage(imgs.get("R"),x,y,null);
 				break;
 			case RD:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x + Tank.WIDTH, y + Tank.HEIGHT);
+				g.drawImage(imgs.get("RD"),x,y,null);
 				break;
 			case D:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x + Tank.WIDTH / 2, y + Tank.HEIGHT);
-				break;
+				g.drawImage(imgs.get("D"),x,y,null);				break;
 			case LD:
-				g.drawLine(x + Tank.WIDTH / 2, y + Tank.HEIGHT / 2, x, y + Tank.HEIGHT);
+				g.drawImage(imgs.get("LD"),x,y,null);
 				break;
 		}
 		move();
@@ -349,9 +370,10 @@ public class Tank{
 			case KeyEvent.VK_F2:
 				if(this.live == false){
 					this.setLife(100);
+					this.dir = Direction.STOP;
 					this.setLive(true);
 				}
-
+				break;
 			case KeyEvent.VK_LEFT:
 				bL = true;
 				break;

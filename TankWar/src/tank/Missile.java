@@ -1,7 +1,10 @@
 package tank;
 
 import java.awt.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 /**
  * 子弹类
  * Created by zhendong on 2016/7/12.
@@ -20,11 +23,35 @@ public class Missile{
 	 */
 	private TankClient tc;
 	private int x,y;
-	private Tank.Direction dir;
+	private Direction dir;
 	public static final int WIDTH = 10,HEIGHT = 10;
 	public static final int XSPEED = 10,YSPEED = 10;
 	private boolean live = true;
 	private boolean good;
+	private static Image[] MissileImages = null;
+	private static Toolkit tk = Toolkit.getDefaultToolkit();
+	private static Map<String , Image> imgs = new HashMap<String , Image>();
+	static {
+		MissileImages = new Image[]
+				{
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileL.gif")),
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileLU.gif")),
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileU.gif")),
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileRU.gif")),
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileR.gif")),
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileRD.gif")),
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileD.gif")),
+						tk.getImage(Tank.class.getClassLoader().getResource("images/MissileLD.gif"))
+				};
+		imgs.put("L",MissileImages[0]);
+		imgs.put("LU",MissileImages[1]);
+		imgs.put("U",MissileImages[2]);
+		imgs.put("RU",MissileImages[3]);
+		imgs.put("R",MissileImages[4]);
+		imgs.put("RD",MissileImages[5]);
+		imgs.put("D",MissileImages[6]);
+		imgs.put("LD",MissileImages[7]);
+	}
 
 	public boolean isLive(){
 		return live;
@@ -38,12 +65,12 @@ public class Missile{
 	 * @param y 子弹的y坐标
 	 * @param dir 坦克的方向
 	 */
-	public Missile(int x, int y, Tank.Direction dir){
+	public Missile(int x, int y, Direction dir){
 		this.x=x;
 		this.y=y;
 		this.dir=dir;
 	}
-	public Missile(int x,int y, Tank.Direction dir,TankClient tc,boolean good){
+	public Missile(int x,int y, Direction dir,TankClient tc,boolean good){
 		this(x,y,dir);
 		this.tc = tc;
 		this.good = good;
@@ -58,11 +85,31 @@ public class Missile{
 			tc.missiles.remove(this);
 			return;
 		}
-		Color c = g.getColor();
-		g.setColor(Color.BLACK);
-		g.fillOval(x,y,WIDTH,HEIGHT);
-		g.setColor(c);
-
+		switch (dir) {
+			case L:
+				g.drawImage(imgs.get("L"),x,y,null);
+				break;
+			case LU:
+				g.drawImage(imgs.get("LU"),x,y,null);
+				break;
+			case U:
+				g.drawImage(imgs.get("U"),x,y,null);
+				break;
+			case RU:
+				g.drawImage(imgs.get("RU"),x,y,null);
+				break;
+			case R:
+				g.drawImage(imgs.get("R"),x,y,null);
+				break;
+			case RD:
+				g.drawImage(imgs.get("RD"),x,y,null);
+				break;
+			case D:
+				g.drawImage(imgs.get("D"),x,y,null);				break;
+			case LD:
+				g.drawImage(imgs.get("LD"),x,y,null);
+				break;
+		}
 		move();
 	}
 
